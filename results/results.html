@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Frequency Results</title>
+    <link rel="stylesheet" href="../styles/base.css" />
+    <link rel="stylesheet" href="results.css" />
+    <link rel="stylesheet" href="detail.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-main">
+        <p class="eyebrow">High-Frequency Word Scanner</p>
+        <h1 id="scan-title">Loading scan...</h1>
+        <div class="header-meta">
+          <a id="scan-url" href="#" rel="noopener noreferrer" target="_blank"></a>
+        </div>
+        <div class="header-chips" id="scan-chips"></div>
+        <p class="header-note" id="truncate-note" hidden></p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn" id="btn-rescan">Rescan page</button>
+        <button type="button" class="btn btn-ghost" id="btn-source">Open source tab</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section class="controls" aria-label="Filters and bulk actions">
+        <div class="controls-row">
+          <div class="search-field">
+            <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.6" />
+              <line x1="13.4" y1="13.4" x2="17.5" y2="17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+            <input
+              id="search"
+              type="search"
+              placeholder="Filter words by prefix or substring"
+              aria-label="Filter words by prefix or substring"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="button" class="search-clear" id="search-clear" aria-label="Clear the filter" hidden>Clear</button>
+          </div>
+
+          <label class="sort-field">
+            <span>Sort</span>
+            <select id="sort" aria-label="Sort order">
+              <option value="freq">Frequency, highest first</option>
+              <option value="alpha">Alphabetical</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="controls-row controls-toggles">
+          <label class="toggle">
+            <input type="checkbox" id="opt-stopwords" />
+            <span>Stop words</span>
+          </label>
+          <label class="toggle">
+            <span>Min length</span>
+            <input type="number" id="opt-minlength" min="1" max="20" step="1" aria-label="Minimum word length" />
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="opt-lemmatize" />
+            <span>Lemmatization</span>
+          </label>
+          <label class="toggle" title="Code and preformatted blocks are excluded by default because they inject identifiers into the word list.">
+            <input type="checkbox" id="opt-code" />
+            <span>Scan code blocks</span>
+          </label>
+          <label class="toggle" title="Skips nav, header, footer, aside, ARIA landmarks and elements whose class or id looks like a cookie banner or a copyright block. Off by default.">
+            <input type="checkbox" id="opt-boilerplate" />
+            <span>Skip boilerplate</span>
+          </label>
+          <button type="button" class="btn btn-sm" id="btn-apply-extraction" hidden>Apply extraction settings</button>
+        </div>
+
+        <div class="controls-row controls-actions">
+          <div class="bulk-actions">
+            <button type="button" class="btn btn-sm" id="btn-select-all">Select all</button>
+            <button type="button" class="btn btn-sm" id="btn-select-filtered">Select filtered</button>
+            <button type="button" class="btn btn-sm" id="btn-invert">Invert</button>
+            <button type="button" class="btn btn-sm" id="btn-clear-selection">Clear</button>
+          </div>
+          <div class="export-actions">
+            <span class="selection-count" id="selection-count">0 selected</span>
+            <button type="button" class="btn btn-primary" id="btn-export">Export .md</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="list-panel" aria-label="Word list">
+        <div class="list-head" role="presentation">
+          <span class="col-check"></span>
+          <span class="col-word">Word</span>
+          <span class="col-bar">Relative frequency</span>
+          <span class="col-count">Count</span>
+        </div>
+
+        <div
+          class="viewport"
+          id="viewport"
+          role="listbox"
+          aria-multiselectable="true"
+          aria-label="Words sorted by frequency. Use the arrow keys to move, Enter to open a definition, Space to select."
+          tabindex="0"
+        >
+          <div class="spacer" id="spacer"></div>
+          <div class="rows" id="rows"></div>
+        </div>
+
+        <div class="empty-state" id="empty-state" hidden>
+          <h2 id="empty-title">No words to show</h2>
+          <p id="empty-body"></p>
+        </div>
+
+        <p class="list-footer" id="list-footer"></p>
+      </section>
+    </main>
+
+    <aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="drawer-word" aria-hidden="true">
+      <header class="drawer-head">
+        <div class="drawer-title">
+          <h2 id="drawer-word">&nbsp;</h2>
+          <p class="drawer-subtitle" id="drawer-subtitle"></p>
+        </div>
+        <button type="button" class="btn btn-icon" id="drawer-close" aria-label="Close the detail panel">Esc</button>
+      </header>
+      <div class="drawer-body" id="drawer-body"></div>
+      <footer class="drawer-foot" id="drawer-foot"></footer>
+    </aside>
+
+    <div class="scrim" id="scrim" hidden></div>
+
+    <dialog class="dialog" id="confirm-dialog">
+      <h2 id="confirm-title">Export everything?</h2>
+      <p id="confirm-body"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="confirm-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirm-accept">Export</button>
+      </div>
+    </dialog>
+
+    <div class="progress-overlay" id="progress-overlay" hidden>
+      <div class="progress-card" role="status" aria-live="polite">
+        <p class="progress-title" id="progress-title">Fetching definitions...</p>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <p class="progress-detail" id="progress-detail"></p>
+        <button type="button" class="btn btn-sm" id="progress-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
+
+    <template id="row-template">
+      <div class="row" role="option" tabindex="-1">
+        <span class="row-check">
+          <input type="checkbox" class="row-checkbox" tabindex="-1" />
+        </span>
+        <span class="row-word-wrap">
+          <button type="button" class="row-word" tabindex="-1"></button>
+          <span class="row-flag" hidden title="This word is usually capitalized on the scanned page.">Aa</span>
+        </span>
+        <span class="row-bar" aria-hidden="true"><i></i></span>
+        <span class="row-count"></span>
+      </div>
+    </template>
+
+    <script type="module" src="results.js"></script>
+  </body>
+</html>

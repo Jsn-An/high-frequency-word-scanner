@@ -1,0 +1,21 @@
+# WordNet build cache
+# The download cache used by tools/build-wordnet-subset.mjs. The script keeps its own copy
+# in the system temporary directory, so nothing in here is part of the project.
+.cache/
+
+# Dependencies
+# The extension has no runtime dependencies and no build step. This line only guards
+# against an accidental `npm install` while running the test suites, which use nothing
+# but Node's standard library.
+node_modules/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+
+# Local test artifacts from tools/e2e-check.mjs when run with --keep
+.e2e-profile/
+.e2e-downloads/

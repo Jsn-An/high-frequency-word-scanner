@@ -1,0 +1,517 @@
+/*
+ * Options page styling.
+ *
+ * Everything visual is built on the tokens in styles/base.css, so the options page and the
+ * results page cannot drift apart: the same border, radius, surface and accent values drive
+ * both, and both follow prefers-color-scheme with no theme state to store.
+ *
+ * The layout is one narrow column. An options page is read top to bottom, and a two-column
+ * grid would make the reading order ambiguous for keyboard and screen-reader users.
+ */
+
+.page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+/* --- Header ------------------------------------------------------------------ */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  max-width: 62ch;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.page-header-actions {
+  flex: 0 0 auto;
+  padding-top: 4px;
+}
+
+/* --- Cards ------------------------------------------------------------------- */
+
+.card {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.card-head h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card-head p {
+  margin-top: 6px;
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card-body {
+  padding: 6px 20px 18px;
+}
+
+.card-body > :first-child {
+  margin-top: 14px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* --- Option rows -------------------------------------------------------------- */
+
+.option-row {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.option-row:last-of-type {
+  border-bottom: none;
+}
+
+.option-note {
+  margin-top: 6px;
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.option-note em {
+  color: var(--text-soft);
+  font-style: normal;
+  font-weight: 600;
+  padding: 0 1px;
+}
+
+.option-note code,
+.attribution code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.option-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.option-row-inline .option-note {
+  flex: 1 1 320px;
+  margin-top: 0;
+}
+
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.field-label {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.field input[type="number"] {
+  width: 72px;
+  text-align: center;
+}
+
+/* --- Switch ------------------------------------------------------------------- */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 22px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(16px);
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.switch-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* --- Stats -------------------------------------------------------------------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.stat {
+  padding: 11px 13px;
+  background: var(--surface);
+}
+
+.stat dt {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.stat dd {
+  margin: 3px 0 0;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Lookup tester ------------------------------------------------------------ */
+
+.lookup-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lookup-form input[type="text"] {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.lookup-result {
+  margin-top: 14px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  font-size: 13px;
+}
+
+.lookup-result[data-kind="error"] {
+  border-left-color: var(--danger);
+}
+
+.lookup-result[data-kind="warning"] {
+  border-left-color: var(--warning);
+}
+
+.lookup-result[data-kind="success"] {
+  border-left-color: var(--success);
+}
+
+.lookup-result h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lookup-result .lookup-meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.lookup-result ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.lookup-result li {
+  margin-bottom: 6px;
+}
+
+.lookup-result .lookup-example {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-style: italic;
+}
+
+/* --- Offline subset ----------------------------------------------------------- */
+
+.command {
+  margin: 10px 0 0;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  overflow-x: auto;
+}
+
+.progress {
+  margin-top: 14px;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 200ms ease;
+}
+
+.progress-detail {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Sources ------------------------------------------------------------------ */
+
+.source-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: source;
+}
+
+.source-list > li {
+  position: relative;
+  padding: 14px 0 14px 34px;
+  border-bottom: 1px solid var(--border);
+  counter-increment: source;
+}
+
+.source-list > li:last-child {
+  border-bottom: none;
+}
+
+.source-list > li::before {
+  content: counter(source);
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.source-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.source-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.attribution {
+  margin-top: 16px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-soft);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* --- Privacy ------------------------------------------------------------------ */
+
+.privacy-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.privacy-list li {
+  margin-bottom: 11px;
+  max-width: 74ch;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.privacy-list strong {
+  color: var(--text);
+}
+
+.privacy-list code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* --- Footer and status -------------------------------------------------------- */
+
+.page-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.save-state {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.save-state[data-kind="error"] {
+  color: var(--danger);
+}
+
+.save-state[data-kind="success"] {
+  color: var(--success);
+}
+
+/* --- Toasts (same behaviour as the results page) ------------------------------- */
+
+.toast-region {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 360px;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast[data-kind="success"] { border-left-color: var(--success); }
+.toast[data-kind="error"] { border-left-color: var(--danger); }
+.toast[data-kind="warning"] { border-left-color: var(--warning); }

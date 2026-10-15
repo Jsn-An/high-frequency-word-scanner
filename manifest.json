@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "High-Frequency Word Scanner",
+  "version": "1.0.0",
+  "description": "Scan the visible English text on a page, rank words by frequency, look up definitions from free English dictionaries, and export your selection as Markdown.",
+  "minimum_chrome_version": "111",
+
+  "permissions": [
+    "storage"
+  ],
+
+  "host_permissions": [
+    "https://api.dictionaryapi.dev/*",
+    "https://en.wiktionary.org/*",
+    "https://api.datamuse.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "_comment_permissions": {
+    "note": "Documentation only. Keys that start with an underscore are ignored by Chrome; delete them if you prefer a bare manifest.",
+    "storage": "Persists the scan payload, the saved selection, the settings, and the dictionary lookup cache locally. No sync, no remote storage.",
+    "host_permissions[0]": "https://api.dictionaryapi.dev - primary dictionary provider (Free Dictionary API). Needed so the service worker can fetch without CORS restrictions.",
+    "host_permissions[1]": "https://en.wiktionary.org - fallback dictionary provider (Wiktionary REST API).",
+    "host_permissions[2]": "https://api.datamuse.com - optional gap filler for definitions and pronunciation hints.",
+    "content_scripts.matches": "Declares the injection target, which is also the only broad host access this extension asks for. It is what places the floating scan button on a page. Without it the button could only appear after a manual click on the toolbar icon.",
+    "not_requested": [
+      "tabs - not needed. The source URL and title come from the content script, and chrome.tabs.create / chrome.tabs.sendMessage work without it.",
+      "downloads - not needed. The Markdown file is produced with a Blob plus an anchor element on the results page.",
+      "scripting - not needed. The content script is declared declaratively and the results page messages the tab that already runs it.",
+      "webRequest - not needed. All dictionary traffic goes through the service worker with host_permissions, so there is nothing to rewrite.",
+      "unlimitedStorage - not needed. The scan payload is roughly 0.5 MB, and the optional WordNet subset lives in IndexedDB, not in chrome.storage.local."
+    ]
+  },
+
+  "_comment_privacy": {
+    "page_content": "Never uploaded. Text is tokenized in the tab and the token list is written to chrome.storage.local on this device.",
+    "network": "The only outbound requests are dictionary lookups issued from the service worker for words the user opened or exported."
+  }
+}

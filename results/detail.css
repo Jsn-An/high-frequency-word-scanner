@@ -1,0 +1,268 @@
+/*
+ * Detail panel: a right-hand sliding drawer.
+ *
+ * Why a drawer and not inline expansion: opening a definition must not move the row the
+ * user is reading. A drawer keeps the list scroll position, the sort order and the
+ * keyboard focus stable, and it has room for the phonetic line, the part-of-speech
+ * groups, the example sentences, the audio button and the source attribution without
+ * turning a 44 pixel row into a 300 pixel one.
+ */
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), visibility 260ms linear;
+  z-index: 50;
+}
+
+.drawer.open {
+  transform: none;
+  visibility: visible;
+}
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer-title {
+  min-width: 0;
+}
+
+.drawer-head h2 {
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.drawer-subtitle {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.drawer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 18px 24px;
+}
+
+.drawer-foot {
+  padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.3);
+  z-index: 45;
+  display: none;
+}
+
+/* The drawer only overlays on narrow viewports, so the scrim only exists there. */
+@media (max-width: 1179px) {
+  .scrim:not([hidden]) {
+    display: block;
+  }
+}
+
+/* --- Content -------------------------------------------------------------------- */
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.detail-phonetic {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+.detail-audio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-soft);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.detail-audio:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.detail-audio svg {
+  width: 13px;
+  height: 13px;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.detail-stat {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+}
+
+.detail-stat dt {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detail-stat dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.detail-meaning {
+  margin-bottom: 18px;
+}
+
+.detail-pos {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+}
+
+.detail-definitions {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-definitions li {
+  padding-left: 2px;
+  color: var(--text-soft);
+  font-size: 13.5px;
+}
+
+.detail-example {
+  display: block;
+  margin-top: 5px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border-strong);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.detail-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-loading .line {
+  height: 12px;
+}
+
+.detail-loading .line.w-60 { width: 60%; }
+.detail-loading .line.w-85 { width: 85%; }
+.detail-loading .line.w-40 { width: 40%; }
+
+.detail-message {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.detail-message[data-kind="error"] {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.detail-message[data-kind="warning"] {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.detail-providers {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.detail-providers li {
+  margin-bottom: 3px;
+}
+
+.detail-source-line {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.detail-source-line a {
+  color: var(--accent);
+}
+
+@media (max-width: 1179px) {
+  .drawer {
+    width: min(420px, 100vw);
+  }
+}

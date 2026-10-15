@@ -1,0 +1,510 @@
+/*
+ * Results page layout: header, toolbar, and the virtualized word list.
+ *
+ * The row geometry here is the contract with results.js: every row is exactly
+ * --row-height tall and top aligned, because the virtual list positions rows by
+ * multiplying that height by the row index. Changing the height in one place is enough,
+ * since results.js reads the computed value.
+ */
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  transition: margin-right 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Header ------------------------------------------------------------------- */
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.header-main {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 72ch;
+}
+
+.header-meta {
+  margin-top: 3px;
+  min-width: 0;
+}
+
+.header-meta a {
+  display: inline-block;
+  max-width: 76ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.header-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.header-note {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* --- Main and toolbar ---------------------------------------------------------- */
+
+.app-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 24px 18px;
+}
+
+@media (min-width: 1180px) {
+  /* The drawer sits beside the content instead of over it, so the list stays readable
+     while a definition is open. */
+  body.drawer-open .app-main,
+  body.drawer-open .app-header {
+    margin-right: 420px;
+  }
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.controls-actions {
+  justify-content: space-between;
+}
+
+.search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 320px;
+  min-width: 240px;
+  max-width: 520px;
+}
+
+.search-field .search-icon {
+  position: absolute;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.search-field input[type="search"] {
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 62px;
+}
+
+.search-clear {
+  position: absolute;
+  right: 6px;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.search-clear:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.sort-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.bulk-actions,
+.export-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selection-count {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.selection-count[data-has-selection="true"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- List ---------------------------------------------------------------------- */
+
+.list-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.list-head,
+.row {
+  display: grid;
+  grid-template-columns: 30px minmax(120px, 1.1fr) minmax(90px, 2fr) 78px;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+}
+
+.list-head {
+  height: 34px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.list-head .col-count {
+  text-align: right;
+}
+
+.viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.viewport:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.spacer {
+  width: 100%;
+  height: 0;
+}
+
+.rows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  will-change: transform;
+}
+
+/*
+ * Vertical pinning: the row is exactly --row-height tall and clips its own content. Without
+ * this, one oversized cell (a very long count, a zoomed font) would make the row grow, and
+ * every row below it would sit lower than the position the virtual list computed from the
+ * index. Clipping keeps the geometry linear, which is what the scroll math depends on.
+ */
+.row {
+  height: var(--row-height);
+  grid-auto-rows: var(--row-height);
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+  transition: background-color 120ms ease;
+}
+
+.row:hover {
+  background: var(--surface-hover);
+}
+
+.row[data-selected="true"] {
+  background: var(--accent-soft);
+}
+
+.row[data-active="true"] {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.row-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.row-word-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.row-word {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-word:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.row[data-selected="true"] .row-word {
+  color: var(--accent);
+}
+
+.row-flag {
+  flex: 0 0 auto;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.row-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.row-bar i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.85;
+  transition: width 160ms ease;
+}
+
+.row-count {
+  justify-self: end;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.list-footer {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty-state {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* --- Dialogs, progress, toasts --------------------------------------------------- */
+
+.dialog {
+  width: min(460px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog::backdrop {
+  background: rgba(16, 24, 40, 0.35);
+}
+
+.dialog h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dialog p {
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.progress-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 24, 40, 0.28);
+  backdrop-filter: blur(1px);
+  z-index: 40;
+}
+
+.progress-card {
+  width: min(400px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.progress-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.progress-track {
+  height: 6px;
+  margin: 12px 0 8px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 180ms ease;
+}
+
+.progress-detail {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.progress-card .btn {
+  margin-top: 14px;
+}
+
+.toast-region {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.toast {
+  max-width: 360px;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast[data-kind="success"] { border-left-color: var(--success); }
+.toast[data-kind="error"] { border-left-color: var(--danger); }
+.toast[data-kind="warning"] { border-left-color: var(--warning); }

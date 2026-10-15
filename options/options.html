@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>High-Frequency Word Scanner - Settings</title>
+    <link rel="stylesheet" href="../styles/base.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">High-Frequency Word Scanner</p>
+          <h1>Settings</h1>
+          <p class="page-subtitle">
+            Scanning defaults, dictionary sources, and what this extension does with the
+            text it reads.
+          </p>
+        </div>
+        <div class="page-header-actions">
+          <button type="button" class="btn" id="open-results">Open the results page</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="card" aria-labelledby="scan-heading">
+          <div class="card-head">
+            <h2 id="scan-heading">Scanning defaults</h2>
+            <p>
+              These apply to every new scan and are also switchable on the results page,
+              where the stored token list is re-analyzed instantly. Only the two extraction
+              options need a rescan, because they change which text is read from the page.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <div class="option-row">
+              <label class="switch">
+                <input type="checkbox" id="opt-stopwords" />
+                <span class="switch-track" aria-hidden="true"></span>
+                <span class="switch-label">Filter out stop words</span>
+              </label>
+              <p class="option-note">
+                Drops function words such as <em>the</em>, <em>of</em> and <em>is</em>. The
+                built-in list also covers inflected auxiliaries and common contractions.
+              </p>
+            </div>
+
+            <div class="option-row">
+              <label class="switch">
+                <input type="checkbox" id="opt-lemmatize" />
+                <span class="switch-track" aria-hidden="true"></span>
+                <span class="switch-label">Group inflected forms (lemmatization)</span>
+              </label>
+              <p class="option-note">
+                Merges <em>running</em>, <em>runs</em> and <em>ran</em> into <em>run</em>,
+                and <em>books</em> into <em>book</em>, using suffix rules plus a list of
+                irregular forms. Rare irregulars may stay separate.
+              </p>
+            </div>
+
+            <div class="option-row option-row-inline">
+              <label class="field">
+                <span class="field-label">Minimum word length</span>
+                <input type="number" id="opt-minlength" min="1" max="20" step="1" />
+              </label>
+              <p class="option-note">
+                Words shorter than this are ignored. The default of 3 removes most
+                two-letter noise without losing real vocabulary.
+              </p>
+            </div>
+
+            <div class="option-row">
+              <label class="switch">
+                <input type="checkbox" id="opt-code" />
+                <span class="switch-track" aria-hidden="true"></span>
+                <span class="switch-label">Read text inside code and preformatted blocks</span>
+              </label>
+              <p class="option-note">
+                Off by default. Documentation and blog pages contain code samples, and their
+                identifiers, file names and API names would flood the ranking with words that
+                are not part of the prose. Turn it on for pages where the code is the text.
+              </p>
+            </div>
+
+            <div class="option-row">
+              <label class="switch">
+                <input type="checkbox" id="opt-boilerplate" />
+                <span class="switch-track" aria-hidden="true"></span>
+                <span class="switch-label">Skip navigation, cookie banners and footers</span>
+              </label>
+              <p class="option-note">
+                Off by default, because the heuristic can hide real content. When it is on,
+                the scan skips <code>nav</code>, <code>header</code>, <code>footer</code>,
+                <code>aside</code>, ARIA landmark roles, and elements whose class or id looks
+                like a menu, a cookie notice, an advert or a copyright block. Repeat-heavy
+                boilerplate is the main reason a word ranking looks wrong on news sites.
+              </p>
+            </div>
+
+            <div class="option-row option-row-inline">
+              <label class="field">
+                <span class="field-label">Default sort order</span>
+                <select id="opt-sort">
+                  <option value="freq">Frequency, highest first</option>
+                  <option value="alpha">Alphabetical</option>
+                </select>
+              </label>
+              <p class="option-note">How the results list opens. The toggle on the results page still overrides it.</p>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-sm" id="reset-settings">Reset to defaults</button>
+              <span class="save-state" id="settings-state" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="cache-heading">
+          <div class="card-head">
+            <h2 id="cache-heading">Dictionary cache</h2>
+            <p>
+              A word is fetched from the network once and then served from this device. The
+              cache is kept in <code>chrome.storage.local</code>, which has a
+              <strong>10 MB</strong> quota that this extension does not extend, so it holds at
+              most 800 words and drops the oldest 200 when it overflows.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <dl class="stat-grid" id="cache-stats">
+              <div class="stat">
+                <dt>Cached words</dt>
+                <dd id="cache-count">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Entries found</dt>
+                <dd id="cache-ok">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Words with no entry anywhere</dt>
+                <dd id="cache-missing">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Failed lookups (retried after 10 minutes)</dt>
+                <dd id="cache-error">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Approximate size</dt>
+                <dd id="cache-bytes">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Most recent lookup</dt>
+                <dd id="cache-newest">-</dd>
+              </div>
+            </dl>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-sm" id="refresh-cache">Refresh</button>
+              <button type="button" class="btn btn-sm" id="clear-cache">Clear the cache</button>
+              <span class="save-state" id="cache-state" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="lookup-heading">
+          <div class="card-head">
+            <h2 id="lookup-heading">Test a lookup</h2>
+            <p>
+              Runs the same provider chain the detail panel uses, and reports which source
+              answered. Useful for checking connectivity, rate limiting, and whether the
+              offline subset is being picked up.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <div class="lookup-form">
+              <input type="text" id="lookup-word" placeholder="A single English word" autocomplete="off" spellcheck="false" aria-label="Word to look up" />
+              <button type="button" class="btn btn-sm btn-primary" id="lookup-run">Look up</button>
+              <button type="button" class="btn btn-sm" id="lookup-force">Ignore the cache</button>
+            </div>
+            <div class="lookup-result" id="lookup-result" hidden></div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="offline-heading">
+          <div class="card-head">
+            <h2 id="offline-heading">Offline dictionary (optional)</h2>
+            <p>
+              Adds WordNet 3.0 as a last-resort source so definitions still work with no
+              network at all. It is not shipped with the extension, because the data would
+              dominate the unpacked folder.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <dl class="stat-grid" id="wordnet-stats">
+              <div class="stat">
+                <dt>Status</dt>
+                <dd id="wordnet-status">Checking...</dd>
+              </div>
+              <div class="stat">
+                <dt>Entries installed</dt>
+                <dd id="wordnet-count">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Data file in the extension folder</dt>
+                <dd id="wordnet-file">-</dd>
+              </div>
+              <div class="stat">
+                <dt>Built on</dt>
+                <dd id="wordnet-built">-</dd>
+              </div>
+            </dl>
+
+            <p class="option-note">
+              Build the data file once with Node.js, then import it here. The script
+              downloads the Princeton WordNet 3.0 database, trims it to single-word entries
+              and writes a gzipped newline-delimited JSON file. See the README for the exact
+              size this produces on your machine.
+            </p>
+            <pre class="command">node tools/build-wordnet-subset.mjs</pre>
+
+            <div class="progress" id="wordnet-progress" hidden>
+              <div class="progress-track"><div class="progress-fill" id="wordnet-progress-fill"></div></div>
+              <p class="progress-detail" id="wordnet-progress-detail"></p>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-sm" id="wordnet-import">Import the offline subset</button>
+              <button type="button" class="btn btn-sm" id="wordnet-remove">Remove the offline data</button>
+              <span class="save-state" id="wordnet-state" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="sources-heading">
+          <div class="card-head">
+            <h2 id="sources-heading">Sources, priority and licences</h2>
+            <p>
+              Sources are tried in this order and the first one that has an entry wins. The
+              detail panel always names the source it used, so you can judge reliability.
+            </p>
+          </div>
+
+          <div class="card-body">
+            <ol class="source-list">
+              <li>
+                <div class="source-name">Free Dictionary API</div>
+                <div class="source-meta">
+                  <span class="chip">Primary</span>
+                  <a href="https://dictionaryapi.dev/" target="_blank" rel="noopener noreferrer">dictionaryapi.dev</a>
+                  <span>Data derived from Wiktionary, CC BY-SA 3.0</span>
+                </div>
+                <p class="option-note">
+                  Returns phonetics, audio, definitions and examples, with no key. Community
+                  run, so a 5xx is retried once and then the next source is tried.
+                </p>
+              </li>
+              <li>
+                <div class="source-name">Wiktionary REST API</div>
+                <div class="source-meta">
+                  <span class="chip">Fallback</span>
+                  <a href="https://en.wiktionary.org/" target="_blank" rel="noopener noreferrer">en.wiktionary.org</a>
+                  <span>CC BY-SA 3.0, attribution required</span>
+                </div>
+                <p class="option-note">
+                  Covers inflected and technical words the primary source lacks. Requests are
+                  spaced out and identify the client, as Wikimedia asks. Attribution appears
+                  in the detail panel and in every exported file.
+                </p>
+              </li>
+              <li>
+                <div class="source-name">Datamuse</div>
+                <div class="source-meta">
+                  <span class="chip">Gap filler</span>
+                  <a href="https://www.datamuse.com/api/" target="_blank" rel="noopener noreferrer">api.datamuse.com</a>
+                  <span>WordNet 3.0 glosses</span>
+                </div>
+                <p class="option-note">
+                  Used only when the two dictionaries have nothing. Returns short glosses and
+                  an ARPAbet pronunciation hint, and never example sentences, which is why it
+                  is not the primary source and why its phonetics are labelled as a hint.
+                </p>
+              </li>
+              <li>
+                <div class="source-name">WordNet 3.0, local subset</div>
+                <div class="source-meta">
+                  <span class="chip">Offline, optional</span>
+                  <a href="https://wordnet.princeton.edu/" target="_blank" rel="noopener noreferrer">wordnet.princeton.edu</a>
+                  <span>Permissive licence, redistribution allowed</span>
+                </div>
+                <p class="option-note">
+                  Read from IndexedDB on demand. No key, no network, and the licence text
+                  travels with the data in <code>data/wordnet-LICENSE.txt</code>.
+                </p>
+              </li>
+            </ol>
+
+            <p class="attribution">
+              Wiktionary text is available under the Creative Commons Attribution-ShareAlike
+              3.0 Unported licence and is used here with attribution to Wiktionary
+              contributors. WordNet 3.0 is distributed by Princeton University under a
+              permissive licence that allows redistribution. No source returns non-English
+              definitions, and no Chinese or English-Chinese dictionary is bundled or queried.
+            </p>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="privacy-heading">
+          <div class="card-head">
+            <h2 id="privacy-heading">Privacy</h2>
+            <p>What leaves this device, and what does not.</p>
+          </div>
+
+          <div class="card-body">
+            <ul class="privacy-list">
+              <li>
+                <strong>Page text never leaves your device.</strong> The content script reads
+                the visible text in the tab you clicked the button on and turns it into a
+                token list. Counting and ranking happen on the results page, locally.
+              </li>
+              <li>
+                <strong>The scan is stored only in <code>chrome.storage.local</code></strong>,
+                on this machine, and is replaced by the next scan. Nothing is synced to a
+                Google account, because the extension does not request the <code>sync</code>
+                scope.
+              </li>
+              <li>
+                <strong>The only outbound requests are dictionary lookups</strong> for a word
+                you explicitly opened in the detail panel, or for the words you chose to
+                export. A scan on its own contacts nothing.
+              </li>
+              <li>
+                <strong>No analytics, no telemetry, no remote code.</strong> The extension
+                declares exactly three dictionary hosts in its manifest and loads no script
+                or font from the network.
+              </li>
+              <li>
+                Dictionary lookups send the word alone. Nothing about the page, the URL, or
+                the surrounding sentence is attached to the request.
+              </li>
+            </ul>
+
+            <div class="card-actions">
+              <button type="button" class="btn btn-sm" id="clear-storage">Delete the stored scan, selections and cache</button>
+              <span class="save-state" id="storage-state" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <p>
+          Page content is never collected or uploaded. All counting happens locally in your
+          browser.
+        </p>
+      </footer>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="false"></div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
