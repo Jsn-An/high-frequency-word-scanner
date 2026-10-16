@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>WordLens — turn any page into a ranked vocabulary list</title>
+<meta name="description" content="WordLens is a Chrome extension that scans the visible English text on a page, ranks every word by how often it appears, shows definitions from free open dictionaries, and exports your picks as Markdown.">
+
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WordLens">
+<meta property="og:title" content="WordLens — turn any page into a ranked vocabulary list">
+<meta property="og:description" content="Scan the English text on any page, see every word ranked by how often it appears, read definitions from free open dictionaries, and export the words you keep as Markdown.">
+<meta property="og:url" content="https://jsn-an.github.io/high-frequency-word-scanner/">
+<meta property="og:image" content="og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="WordLens results page showing English words ranked by frequency next to an open definition panel.">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WordLens — turn any page into a ranked vocabulary list">
+<meta name="twitter:description" content="A Chrome extension that ranks the English words on any page by frequency, shows definitions from free open dictionaries, and exports your picks as Markdown.">
+<meta name="twitter:image" content="og-image.png">
+
+<link rel="canonical" href="https://jsn-an.github.io/high-frequency-word-scanner/">
+
+<!-- Inline SVG favicon: no file, no request. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f46e5'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M16 6.5a9.5 9.5 0 1 1-8.2 14.3' opacity='.75'/%3E%3Cpath d='M16 11.4a4.6 4.6 0 1 1-3.6 7.5' opacity='.55'/%3E%3Cpath d='M16 16l9.6 9.6'/%3E%3C/g%3E%3C/svg%3E">
+
+<link rel="stylesheet" href="styles.css">
+
+<!-- Adds the .js hook before first paint so reveal animations never flash. With JavaScript
+     disabled this line never runs, the .no-js class stays, and all content renders visible. -->
+<script>document.documentElement.classList.replace('no-js', 'js');</script>
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" id="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" focusable="false">
+          <path d="M16 6.5a9.5 9.5 0 1 1-8.2 14.3" opacity=".75"/>
+          <path d="M16 11.4a4.6 4.6 0 1 1-3.6 7.5" opacity=".55"/>
+          <path d="M16 16l9.6 9.6"/>
+        </svg>
+      </span>
+      <span class="brand-name">WordLens</span>
+    </a>
+
+    <button class="nav-toggle" type="button" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle-box" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="visually-hidden">Menu</span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="Main">
+      <ul class="site-nav-list">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How it works</a></li>
+        <li><a href="#install">Install</a></li>
+      </ul>
+      <a class="btn btn-primary btn-sm" href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================== Hero ============================== -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <p class="pill">
+        <span class="pill-dot" aria-hidden="true"></span>
+        Free &middot; no account &middot; no API key
+      </p>
+      <h1 id="hero-title">Turn any page you read into a vocabulary list.</h1>
+      <p class="hero-lede">
+        WordLens scans the visible English text on a page, ranks every word by how often it appears,
+        and shows definitions you can export as Markdown.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#install">Install the extension</a>
+        <a class="link-arrow" href="#how-it-works">
+          See how it works
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 8h9.5"/><path d="m9 4.5 3.5 3.5L9 11.5"/></svg>
+        </a>
+      </div>
+      <p class="hero-note">Chrome 114 or newer. Nothing to sign up for.</p>
+    </div>
+  </section>
+
+  <!-- ========================== Product preview ========================== -->
+  <section class="preview reveal" aria-labelledby="preview-title">
+    <div class="container">
+      <h2 class="section-title" id="preview-title">What it looks like while you read</h2>
+      <p class="section-lede">The scan button stays out of the way in the bottom-left corner. The word list opens in its own tab.</p>
+
+      <div class="mock-stage" role="img" aria-label="Illustration of the extension: on the left, a browser window showing an article with the WordLens scan button in the bottom-left corner, its radar icon sweeping; on the right, the WordLens results page listing tide, sediment, vessel and other words with counts and frequency bars, a search box, and an open definition panel for the word tide with the phonetic transcription, a noun definition, an example sentence and the source label.">
+
+        <!-- Browser window with the floating scan button -->
+        <div class="mock-window mock-browser">
+          <div class="mock-bar">
+            <span class="mock-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="mock-url">coastline-review.example/tide-pools</span>
+          </div>
+          <div class="mock-page">
+            <p class="mock-kicker">Field notes</p>
+            <p class="mock-article-title">Reading the harbour at low tide</p>
+            <p class="mock-para">Every low tide leaves a fresh record on the flat. The sediment settles in thin bands, and each band holds a little more water than the one below it.</p>
+            <p class="mock-para">A vessel left on the mud rests at an angle. By the time the flood returns, the hull has already begun to carve its own hollow in the sand.</p>
+
+            <div class="scan-fab" aria-hidden="true">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" focusable="false">
+                <circle cx="16" cy="16" r="11.5" class="scan-arc" opacity=".3"/>
+                <circle cx="16" cy="16" r="6.5" class="scan-arc" opacity=".5"/>
+                <g class="scan-sweep"><path d="M16 16 27.5 4.5"/></g>
+                <circle cx="16" cy="16" r="2" fill="currentColor" stroke="none"/>
+                <circle cx="16" cy="16" r="4" class="scan-ring" vector-effect="non-scaling-stroke"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results page -->
+        <div class="mock-window mock-results">
+          <div class="mock-bar">
+            <span class="mock-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="mock-url">WordLens &middot; Results</span>
+          </div>
+          <div class="mock-results-body">
+            <div class="mock-toolbar">
+              <p class="mock-toolbar-title">318 unique words</p>
+              <span class="mock-search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3.5 3.5"/></svg>
+                <span>Search words&hellip;</span>
+              </span>
+            </div>
+
+            <div class="mock-split">
+              <ul class="mock-list">
+                <li class="mock-row is-active"><span class="mock-check is-on"></span><span class="mock-word">tide</span><span class="mock-count">12</span><span class="mock-track"><span class="mock-track-fill" style="--w:100%"></span></span></li>
+                <li class="mock-row"><span class="mock-check"></span><span class="mock-word">sediment</span><span class="mock-count">8</span><span class="mock-track"><span class="mock-track-fill" style="--w:67%"></span></span></li>
+                <li class="mock-row"><span class="mock-check is-on"></span><span class="mock-word">vessel</span><span class="mock-count">6</span><span class="mock-track"><span class="mock-track-fill" style="--w:50%"></span></span></li>
+                <li class="mock-row"><span class="mock-check"></span><span class="mock-word">harbour</span><span class="mock-count">5</span><span class="mock-track"><span class="mock-track-fill" style="--w:42%"></span></span></li>
+                <li class="mock-row"><span class="mock-check"></span><span class="mock-word">mud</span><span class="mock-count">4</span><span class="mock-track"><span class="mock-track-fill" style="--w:33%"></span></span></li>
+                <li class="mock-row"><span class="mock-check"></span><span class="mock-word">flood</span><span class="mock-count">3</span><span class="mock-track"><span class="mock-track-fill" style="--w:25%"></span></span></li>
+              </ul>
+
+              <aside class="mock-detail">
+                <div class="mock-detail-head">
+                  <span class="mock-detail-word">tide</span>
+                  <span class="mock-detail-phon">/ta&#618;d/</span>
+                  <span class="mock-audio" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 6.5h2L8.5 4v8L6 9.5H4z"/><path d="M11 6.2a2.6 2.6 0 0 1 0 3.6"/></svg>
+                  </span>
+                </div>
+                <p class="mock-source">Wiktionary</p>
+                <div class="mock-pos">
+                  <p class="mock-pos-label">noun</p>
+                  <p class="mock-def">The regular rise and fall of the sea, driven by the moon and the sun.</p>
+                  <p class="mock-example">The boats settled into the mud as the tide went out.</p>
+                </div>
+                <div class="mock-pos">
+                  <p class="mock-pos-label">verb</p>
+                  <p class="mock-def">To drift along with the current.</p>
+                </div>
+                <p class="mock-occurs">12 occurrences on this page</p>
+              </aside>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== The problem ============================== -->
+  <section class="section reveal" id="problem" aria-labelledby="problem-title">
+    <div class="container">
+      <h2 class="section-title" id="problem-title">Reading alone does not build a vocabulary</h2>
+      <p class="section-lede">You finish the article and the unfamiliar words are still unfamiliar. Three reasons why.</p>
+
+      <div class="card-grid card-grid-4">
+        <article class="card">
+          <h3 class="card-title">You read straight past the words you do not know</h3>
+          <p>Stopping for every unfamiliar word breaks the flow, so you keep going. By the end of the page you cannot name a single word you skipped.</p>
+        </article>
+        <article class="card">
+          <h3 class="card-title">Without the sentence, the definition does not stick</h3>
+          <p>You look the word up somewhere else, read one line, and close the tab. The context that made it memorable is gone.</p>
+        </article>
+        <article class="card">
+          <h3 class="card-title">Every word looks equally worth learning</h3>
+          <p>A word used forty times on a page will meet you again next week. A word used once probably will not. A plain list of words cannot tell you which is which.</p>
+        </article>
+        <article class="card">
+          <h3 class="card-title">Notes you copy by hand never get opened again</h3>
+          <p>Typing definitions into a document takes longer than the reading did, and the file ends up somewhere you never look.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== How it works ============================== -->
+  <section class="section section-alt reveal" id="how-it-works" aria-labelledby="how-title">
+    <div class="container">
+      <h2 class="section-title" id="how-title">How it works</h2>
+      <p class="section-lede">Three steps, all on the page you are already reading.</p>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.4 6.4"/><circle cx="12" cy="12" r="1.6"/></svg>
+          </span>
+          <span class="step-number" aria-hidden="true">1</span>
+          <h3 class="step-title">Scan the page</h3>
+          <p>Click the button in the bottom-left corner. WordLens walks the visible text once, counts every English word in your browser, and shows progress while it works.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 20h18"/><path d="M6 20V11"/><path d="M11 20V4"/><path d="M16 20v-6"/><path d="M21 20V8"/></svg>
+          </span>
+          <span class="step-number" aria-hidden="true">2</span>
+          <h3 class="step-title">See the words ranked by frequency</h3>
+          <p>The results open in a new tab, ordered by how often each word appears. Common stop words and very short words are filtered out by default, and the filters are yours to change.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m9 14.5 2 2 4-4"/></svg>
+          </span>
+          <span class="step-number" aria-hidden="true">3</span>
+          <h3 class="step-title">Look up and export the ones you want</h3>
+          <p>Click a word for its definition and examples, check the words worth keeping, then export them as a Markdown file you can keep or share.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================== Features ============================== -->
+  <section class="section reveal" id="features" aria-labelledby="features-title">
+    <div class="container">
+      <h2 class="section-title" id="features-title">Features</h2>
+      <p class="section-lede">Everything the extension does, and nothing it does not.</p>
+
+      <div class="card-grid card-grid-3">
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.4 6.4"/><circle cx="12" cy="12" r="1.6"/></svg>
+          </span>
+          <h3 class="card-title">Scan any page</h3>
+          <p>A scan-style button sits in the bottom-left corner of every page. One click reads the visible English text; the icon sweeps while it works and a short toast reports what it found.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3 20h18"/><path d="M6 20V11"/><path d="M11 20V4"/><path d="M16 20v-6"/><path d="M21 20V8"/></svg>
+          </span>
+          <h3 class="card-title">Frequency-ranked word list</h3>
+          <p>The scan opens the extension's own results page in a new tab, listing every English word sorted by how often it appears on the page you just read. Common stop words and words shorter than three characters are filtered out by default, with toggles to change both.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 5h9a3 3 0 0 1 3 3"/><path d="M4 19h9a3 3 0 0 0 3-3"/><path d="M16 11h4"/><path d="m17.5 8.5 3 2.5-3 2.5"/><path d="M12 12h-2"/></svg>
+          </span>
+          <h3 class="card-title">Smart merging</h3>
+          <p>Word forms are merged, so <code>running</code>, <code>runs</code>, and <code>ran</code> count as one entry and the ranking reflects the words you met rather than the forms they arrived in. Turn the merging rule off to see every surface form on its own.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v14H6.5A2.5 2.5 0 0 0 4 19.5z"/><path d="M19 17v4H6.5A2.5 2.5 0 0 1 4 18.5"/><path d="M8 7.5h7M8 11h5"/></svg>
+          </span>
+          <h3 class="card-title">Instant definitions</h3>
+          <p>Click any word to see its phonetic transcription, part of speech, definitions, and example sentences, plus audio pronunciation when the source provides it. Definitions come from free, open English dictionary sources, and the panel labels which source each result came from.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m9 14.5 2 2 4-4"/></svg>
+          </span>
+          <h3 class="card-title">Pick and export</h3>
+          <p>Check the words worth keeping, or select all, invert the selection, or take just the current filtered results. Export writes a Markdown file that renders correctly in Typora, VS Code, and on GitHub.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/><path d="M8.5 11h5"/></svg>
+          </span>
+          <h3 class="card-title">Fast and searchable</h3>
+          <p>The search box filters the list instantly as you type, and sorting switches between frequency and alphabetical. The list stays smooth with several thousand words on screen.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 5 6v5.4c0 4.2 2.9 7.7 7 9.6 4.1-1.9 7-5.4 7-9.6V6l-7-3z"/><path d="m9.4 12.2 1.9 1.9 3.5-3.7"/></svg>
+          </span>
+          <h3 class="card-title">Private by design</h3>
+          <p>Page text is never collected or uploaded, and all counting happens locally in the browser. The only outbound network requests are dictionary lookups for words you actually click.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3.6 12.4 12.4 3.6H20v7.6l-8.8 8.8a1.9 1.9 0 0 1-2.7 0l-4.9-4.9a1.9 1.9 0 0 1 0-2.7z"/><circle cx="16.4" cy="7.6" r="1.3"/></svg>
+          </span>
+          <h3 class="card-title">No account, no key, no cost</h3>
+          <p>Definitions come from free, open dictionary sources. There is nothing to sign up for, no API key to paste, and no paid tier to unlock the parts that matter.</p>
+        </article>
+
+        <article class="card card-feature">
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="2.5" y="6.5" width="19" height="11" rx="2.5"/><path d="M6.5 10.5h.01M10 10.5h.01M13.5 10.5h.01M17 10.5h.01"/><path d="M8 14h8"/></svg>
+          </span>
+          <h3 class="card-title">Comfortable UI</h3>
+          <p>Dark and light mode follow your system setting. Arrow keys move through the list, <kbd>Enter</kbd> opens a word, and <kbd>Esc</kbd> closes it.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Install ============================== -->
+  <section class="section section-alt reveal" id="install" aria-labelledby="install-title">
+    <div class="container">
+      <h2 class="section-title" id="install-title">Install</h2>
+      <p class="section-lede">Two ways in. The Chrome Web Store listing is not live yet, so start from the source.</p>
+
+      <div class="install-grid">
+
+        <article class="install-option">
+          <header class="install-option-head">
+            <h3>From source</h3>
+            <span class="badge badge-now">Works today</span>
+          </header>
+          <p class="install-option-lede">The extension has no build step and no dependencies. Chrome loads the folder as it is.</p>
+          <ol class="install-steps">
+            <li>
+              <span class="install-step-title">Download or clone the extension repository</span>
+              <p>Grab the ZIP from <a href="https://github.com/Jsn-An/high-frequency-word-scanner" target="_blank" rel="noopener noreferrer">github.com/Jsn-An/high-frequency-word-scanner</a> and unzip it, or clone it with <code>git clone</code>. Keep the <code>data</code> folder next to <code>manifest.json</code> if you want the optional offline dictionary; the extension loads without it too.</p>
+            </li>
+            <li>
+              <span class="install-step-title">Open <code>chrome://extensions</code> in Chrome</span>
+              <p>Type the address into the URL bar and press Enter. It is a browser-internal page, so it cannot be linked from here.</p>
+            </li>
+            <li>
+              <span class="install-step-title">Turn on Developer mode</span>
+              <p>The switch is in the top-right corner of that page. Three developer buttons appear once it is on.</p>
+            </li>
+            <li>
+              <span class="install-step-title">Click Load unpacked and select the extension folder</span>
+              <p>Choose the folder that contains <code>manifest.json</code> &mdash; the repository root, not the <code>docs</code> folder you are reading now.</p>
+            </li>
+            <li>
+              <span class="install-step-title">Pin it to the toolbar if you like</span>
+              <p>Pinning is optional. Either way, the scan button appears in the bottom-left corner of pages automatically &mdash; there is no toolbar popup to open first.</p>
+            </li>
+          </ol>
+        </article>
+
+        <article class="install-option" id="store-option">
+          <header class="install-option-head">
+            <h3>From the Chrome Web Store</h3>
+            <span class="badge badge-soon" data-store-badge>Coming soon</span>
+          </header>
+          <p class="install-option-lede">The extension is being prepared for the store. This page will not send you to a listing that does not exist yet.</p>
+
+          <p class="store-button-wrap">
+            <a class="btn btn-primary btn-disabled" id="store-button" href="#store-option" data-store-button aria-disabled="true" tabindex="-1">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4.5h13"/><path d="m11 10.5 2.5 2.5L11 15.5"/><path d="M13.5 13H13a4 4 0 0 1-4-4V2.5"/></svg>
+              Add to Chrome
+            </a>
+            <span class="store-note" data-store-note>Not published yet</span>
+          </p>
+
+          <div class="note-box">
+            <p><strong>Turning this on later:</strong> open <code>docs/script.js</code> and set <code>STORE_AVAILABLE</code> to <code>true</code>, then paste the listing address into <code>STORE_URL</code>. The button above stops being disabled, links to the listing, and the "Coming soon" badge disappears. Both values sit at the top of the file, marked with a comment.</p>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="note-box note-box-wide" role="note">
+        <p class="requirements-title">Requirements</p>
+        <ul class="requirements-list">
+          <li>Chrome 114 or newer on desktop.</li>
+          <li>No account, no sign-in, and no API key.</li>
+          <li>An internet connection for definitions only. Scanning and counting work offline.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== Privacy ============================== -->
+  <section class="section reveal" id="privacy" aria-labelledby="privacy-title">
+    <div class="container">
+      <h2 class="section-title" id="privacy-title">Privacy</h2>
+      <p class="section-lede">The short version: the pages you read stay on your computer.</p>
+
+      <ul class="check-list">
+        <li>
+          <span class="check-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 10.5 3.4 3.4L15 7.5"/></svg>
+          </span>
+          <p><strong>No data collection, no analytics, no accounts.</strong> The extension has no sign-in and no telemetry. The counting happens in the tab you are reading, and the result is stored on your own device so the results page can restore it after a refresh.</p>
+        </li>
+        <li>
+          <span class="check-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 10.5 3.4 3.4L15 7.5"/></svg>
+          </span>
+          <p><strong>Page text is never uploaded.</strong> No page content, page URL, or surrounding sentence is ever sent anywhere. Nothing about the article you read leaves your browser.</p>
+        </li>
+        <li>
+          <span class="check-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 10.5 3.4 3.4L15 7.5"/></svg>
+          </span>
+          <p><strong>The only outbound requests are dictionary lookups for words you click.</strong> A lookup sends the single word &mdash; nothing else &mdash; to a free open dictionary, and the answer is cached so the same word is never fetched twice. Open a word offline and the panel tells you the lookup failed instead of hanging.</p>
+        </li>
+        <li>
+          <span class="check-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 10.5 3.4 3.4L15 7.5"/></svg>
+          </span>
+          <p><strong>This page collects nothing either.</strong> No cookies, no analytics script, no third-party requests, and no fonts or images loaded from anywhere else.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================== FAQ ============================== -->
+  <section class="section section-alt reveal" id="faq" aria-labelledby="faq-title">
+    <div class="container">
+      <h2 class="section-title" id="faq-title">Questions</h2>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>
+            <span>Does it work on any website?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>It runs on any <code>http</code> or <code>https</code> page, including pages behind a login, because the scan happens in your own tab. Chrome does not allow extensions to run on its internal pages, so the button will not appear on <code>chrome://</code> settings, the Chrome Web Store, or other extensions' pages.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Does it send my browsing data anywhere?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>No. The text is counted in your browser and the result stays on your device. The only requests the extension makes are dictionary lookups for words you click, and each of those carries the single word, not the page, the URL, or the sentence it came from.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Why is my word count different from the words I can see?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>Four things usually explain the gap. Hidden elements, scripts, and styles are skipped entirely. Code blocks are excluded by default, so identifiers from examples are not counted. Word forms are merged into one entry. And stop words plus words shorter than three characters are filtered out of the list by default, though their counts are still behind the toggles.</p>
+            <p>On a very long page the scan stops at 200,000 characters so the tab stays responsive, and the results page says so in a banner when that happens.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Can it handle any language?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>It looks for English words, so on a bilingual page the ranking reflects the English text and the rest is ignored. Digits, URLs, email addresses, and filenames are skipped as well, which keeps host names and file extensions out of the list.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Does it need an internet connection?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>Scanning, ranking, filtering, and searching all work offline. Definitions are fetched from free online dictionaries, so you need a connection to open a word or to export a file with definitions in it. Words whose definitions have not loaded still export with their word and count.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Is it free?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>Yes. There is no paid tier, no account, and no API key. The dictionary sources it reads from are free and open, which is also why the extension can work without you signing up for anything.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Do I have to pick words one at a time?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>No. You can select all, clear, invert the selection, or select just the results of the filter you are currently looking at. If you export with nothing selected, the extension offers to export everything and tells you how many words that is, rather than guessing.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
+            <span>Where do the definitions come from?</span>
+            <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m4 6.5 4 4 4-4"/></svg>
+          </summary>
+          <div class="faq-body">
+            <p>From free, open English dictionary sources: Wiktionary and WordNet. The detail panel labels the source of each result, so you can tell where a definition came from. A word that no source knows is reported plainly instead of leaving an empty panel.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" focusable="false">
+          <path d="M16 6.5a9.5 9.5 0 1 1-8.2 14.3" opacity=".75"/>
+          <path d="M16 11.4a4.6 4.6 0 1 1-3.6 7.5" opacity=".55"/>
+          <path d="M16 16l9.6 9.6"/>
+        </svg>
+      </span>
+      <span class="brand-name">WordLens</span>
+      <p class="footer-tagline">A Chrome extension that turns the page you are reading into a ranked English vocabulary list.</p>
+    </div>
+
+    <div class="footer-col">
+      <h2 class="footer-heading">Data sources</h2>
+      <p>Definitions come from free, open dictionaries. Wiktionary content is licensed <abbr title="Creative Commons Attribution-ShareAlike 4.0 International">CC BY-SA 4.0</abbr> and is credited to the Wiktionary contributors. WordNet 3.0 is used under its permissive WordNet licence, &copy; Princeton University.</p>
+    </div>
+
+    <div class="footer-col">
+      <h2 class="footer-heading">Project</h2>
+      <ul class="footer-links">
+        <li><a href="https://github.com/Jsn-An/high-frequency-word-scanner" target="_blank" rel="noopener noreferrer">Source repository</a></li>
+        <li><a href="#install">Installation steps</a></li>
+        <li><a href="#top">Back to top</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; <span id="year">2026</span> WordLens</p>
+    <p>Built as a Chrome extension with no build step and no tracking.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

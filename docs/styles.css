@@ -1,0 +1,1521 @@
+/* =========================================================================
+   WordLens landing page — stylesheet
+   No frameworks, no build step, no external assets. Everything below uses
+   design tokens declared once in :root, so the whole palette can be changed
+   from one place.
+
+   Contents
+   1.  Design tokens
+   2.  Reset and base
+   3.  Layout primitives
+   4.  Typography
+   5.  Buttons and links
+   6.  Utilities
+   7.  Header and navigation
+   8.  Hero
+   9.  Product preview (mock browser, results page, scan button)
+   10. Cards
+   11. Steps
+   12. Install
+   13. Check list (privacy)
+   14. FAQ
+   15. Footer
+   16. Scroll reveal
+   17. Responsive adjustments
+   18. Reduced motion and forced colors
+   ========================================================================= */
+
+/* =========================================================================
+   1. Design tokens
+   ========================================================================= */
+
+:root {
+  /* Palette — light is the default theme. One background, one surface, one
+     text colour, one muted colour, one accent, one border colour. */
+  --bg: #ffffff;
+  --surface: #f7f8fa;
+  --surface-strong: #eff1f4;
+  --card-bg: #ffffff;
+  --text: #16181d;
+  --muted: #5a6472;
+  --border: #e4e7ec;
+  --border-strong: #ccd2dc;
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+  --accent-text: #4f46e5;
+  --accent-soft: rgba(79, 70, 229, 0.08);
+  --focus: #4f46e5;
+  --code-bg: #f2f3f6;
+  --header-bg: rgba(255, 255, 255, 0.62);
+  --header-bg-scrolled: rgba(255, 255, 255, 0.86);
+  --hero-glow-1: rgba(79, 70, 229, 0.16);
+  --hero-glow-2: rgba(124, 116, 255, 0.13);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 2px 4px rgba(16, 24, 40, 0.04), 0 12px 28px -12px rgba(16, 24, 40, 0.18);
+  --shadow-fab: 0 6px 18px rgba(79, 70, 229, 0.32);
+
+  /* Typography — system stack only, nothing downloaded. */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Fluid type scale. Each step interpolates between a mobile floor and a
+     desktop ceiling, so no step has to be re-declared per breakpoint. */
+  --fs-h1: clamp(2.1rem, 1.5rem + 2.7vw, 3.35rem);
+  --fs-h2: clamp(1.55rem, 1.3rem + 1.25vw, 2.15rem);
+  --fs-h3: clamp(1.05rem, 1rem + 0.3vw, 1.25rem);
+  --fs-lede: clamp(1.05rem, 1rem + 0.4vw, 1.22rem);
+  --fs-body: clamp(1rem, 0.98rem + 0.1vw, 1.06rem);
+  --fs-sm: 0.9375rem;
+  --fs-xs: 0.8125rem;
+
+  --lh-tight: 1.12;
+  --lh-snug: 1.28;
+  --lh-body: 1.65;
+
+  /* Spacing scale. */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 2.5rem;
+  --sp-8: 3rem;
+  --sp-9: 4rem;
+  --section-y: clamp(3.5rem, 2.25rem + 5.5vw, 6.5rem);
+
+  /* Shape and motion. */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+  --container: 1160px;
+  --header-h: 4rem;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1014;
+    --surface: #12161d;
+    --surface-strong: #1b2029;
+    --card-bg: #161a21;
+    --text: #e9ebf0;
+    --muted: #a2aab8;
+    --border: #262c36;
+    --border-strong: #3a4250;
+    --accent: #4f46e5;
+    --accent-strong: #4338ca;
+    --accent-text: #a5b4fc;
+    --accent-soft: rgba(165, 180, 252, 0.14);
+    --focus: #a5b4fc;
+    --code-bg: #1c212b;
+    --header-bg: rgba(14, 16, 20, 0.6);
+    --header-bg-scrolled: rgba(14, 16, 20, 0.85);
+    --hero-glow-1: rgba(79, 70, 229, 0.34);
+    --hero-glow-2: rgba(124, 116, 255, 0.16);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.5), 0 16px 32px -16px rgba(0, 0, 0, 0.7);
+    --shadow-fab: 0 6px 20px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* =========================================================================
+   2. Reset and base
+   ========================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 1rem);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure {
+  margin: 0;
+}
+
+ul, ol {
+  padding: 0;
+}
+
+svg {
+  display: block;
+}
+
+a {
+  color: var(--accent-text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.08em 0.34em;
+  white-space: nowrap;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0.05em 0.34em;
+  background: var(--surface);
+  color: var(--text);
+}
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* =========================================================================
+   3. Layout primitives
+   ========================================================================= */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+
+.check-list {
+  /* Left-aligned with the rest of the page rather than centred, so every
+     section title shares one edge while the text keeps a readable measure. */
+  max-width: 52rem;
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+
+.section-alt {
+  background: var(--surface);
+}
+
+/* =========================================================================
+   4. Typography
+   ========================================================================= */
+
+.section-title {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  font-weight: 660;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.section-lede {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-lede);
+  line-height: 1.55;
+  color: var(--muted);
+  max-width: 54ch;
+}
+
+/* =========================================================================
+   5. Buttons and links
+   ========================================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.85rem;
+}
+
+.btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.btn-disabled,
+.btn-disabled:hover {
+  background: var(--surface-strong);
+  border-color: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.72rem 0.25rem;
+}
+
+.link-arrow svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.18s var(--ease);
+}
+
+.link-arrow:hover svg {
+  transform: translateX(3px);
+}
+
+/* =========================================================================
+   6. Utilities
+   ========================================================================= */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 200;
+  padding: 0.6rem 0.95rem;
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: #ffffff;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.18s var(--ease);
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* =========================================================================
+   7. Header and navigation
+   ========================================================================= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.site-header.is-scrolled {
+  background: var(--header-bg-scrolled);
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  min-height: var(--header-h);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--accent-text);
+}
+
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 2vw, 1.4rem);
+}
+
+.site-nav-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem clamp(0.85rem, 2vw, 1.5rem);
+  list-style: none;
+  margin: 0;
+}
+
+.site-nav-list a {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  color: var(--muted);
+  text-decoration: none;
+  padding-block: 0.35rem;
+  transition: color 0.18s var(--ease);
+}
+
+.site-nav-list a:hover {
+  color: var(--text);
+}
+
+.nav-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.nav-toggle-box {
+  display: grid;
+  gap: 4px;
+  width: 18px;
+}
+
+.nav-toggle-box span {
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.22s var(--ease), opacity 0.22s var(--ease);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-box span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-box span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle-box span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* =========================================================================
+   8. Hero
+   ========================================================================= */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(3rem, 2rem + 7vw, 5.5rem) clamp(2.5rem, 2rem + 4vw, 4.5rem);
+}
+
+.hero-glow {
+  position: absolute;
+  inset: -22rem 0 auto 0;
+  height: 44rem;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 52% at 50% 42%, var(--hero-glow-1), transparent 72%),
+    radial-gradient(34% 40% at 84% 30%, var(--hero-glow-2), transparent 70%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--card-bg);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 550;
+}
+
+.pill-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--accent-text);
+}
+
+.hero h1 {
+  margin-top: var(--sp-5);
+  max-width: 20ch;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+  font-weight: 680;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.hero-lede {
+  margin-top: var(--sp-5);
+  max-width: 46ch;
+  font-size: var(--fs-lede);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem var(--sp-3);
+  margin-top: var(--sp-6);
+}
+
+.hero-note {
+  margin-top: var(--sp-5);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* =========================================================================
+   9. Product preview
+   ========================================================================= */
+
+.preview {
+  padding-block: clamp(2.5rem, 2rem + 4vw, 4.5rem) var(--section-y);
+}
+
+.mock-stage {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.mock-window {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.mock-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.mock-dots {
+  display: inline-flex;
+  gap: 5px;
+  flex: none;
+}
+
+.mock-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.mock-url {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- mock article page ------------------------------------------------- */
+
+.mock-page {
+  position: relative;
+  /* The extra bottom space keeps the last paragraph clear of the floating
+     scan button, the way a page's own padding would. */
+  padding: clamp(1rem, 3vw, 1.6rem) clamp(1rem, 3vw, 1.6rem) 5.25rem;
+  min-height: 15rem;
+}
+
+.mock-kicker {
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.mock-article-title {
+  margin-top: 0.4rem;
+  font-size: clamp(1.05rem, 2.4vw, 1.32rem);
+  line-height: 1.25;
+  font-weight: 660;
+  letter-spacing: -0.01em;
+  max-width: 30ch;
+}
+
+.mock-para {
+  margin-top: 0.75rem;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 52ch;
+}
+
+/* --- the floating scan button ------------------------------------------ */
+
+.scan-fab {
+  position: absolute;
+  left: clamp(0.75rem, 2vw, 1.1rem);
+  bottom: clamp(0.75rem, 2vw, 1.1rem);
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: var(--shadow-fab);
+}
+
+.scan-fab svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.scan-sweep,
+.scan-ring {
+  transform-box: view-box;
+  transform-origin: 16px 16px;
+}
+
+.scan-sweep {
+  animation: scan-sweep 2.8s linear infinite;
+}
+
+.scan-ring {
+  animation: scan-ping 2.8s ease-out infinite;
+}
+
+@keyframes scan-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scan-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* --- mock results page -------------------------------------------------- */
+
+.mock-results-body {
+  padding: clamp(0.85rem, 2.4vw, 1.15rem);
+}
+
+.mock-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.mock-toolbar-title {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.mock-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.mock-search svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: none;
+}
+
+.mock-search span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mock-split {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.mock-list {
+  display: grid;
+  gap: 0.15rem;
+  list-style: none;
+  margin: 0;
+  align-content: start;
+}
+
+.mock-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "check word count"
+    "check track track";
+  align-items: center;
+  gap: 0.15rem 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: var(--r-sm);
+}
+
+.mock-row.is-active {
+  background: var(--accent-soft);
+}
+
+.mock-check {
+  grid-area: check;
+  width: 1rem;
+  height: 1rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  align-self: center;
+  position: relative;
+}
+
+.mock-check.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.mock-check.is-on::after {
+  content: "";
+  position: absolute;
+  left: 0.24rem;
+  top: 0.32rem;
+  width: 0.42rem;
+  height: 0.22rem;
+  border-left: 1.8px solid #ffffff;
+  border-bottom: 1.8px solid #ffffff;
+  transform: rotate(-45deg);
+}
+
+.mock-word {
+  grid-area: word;
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mock-count {
+  grid-area: count;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mock-track {
+  grid-area: track;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.mock-track-fill {
+  display: block;
+  height: 100%;
+  width: var(--w, 0%);
+  border-radius: inherit;
+  background: var(--accent-text);
+  opacity: 0.85;
+}
+
+.mock-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+
+.mock-detail-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mock-detail-word {
+  font-size: 1.15rem;
+  font-weight: 660;
+  letter-spacing: -0.01em;
+}
+
+.mock-detail-phon {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.mock-audio {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: auto;
+  align-self: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.mock-audio svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.mock-source {
+  align-self: flex-start;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.mock-pos-label {
+  font-size: var(--fs-xs);
+  font-style: italic;
+  color: var(--muted);
+  margin-bottom: 0.1rem;
+}
+
+.mock-def {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.mock-example {
+  margin-top: 0.35rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--border-strong);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.mock-occurs {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* =========================================================================
+   10. Cards
+   ========================================================================= */
+
+.card-grid {
+  display: grid;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.card {
+  padding: clamp(1.15rem, 2.6vw, 1.6rem);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-feature {
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.card-feature:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.card-title {
+  font-size: var(--fs-h3);
+  line-height: 1.32;
+  font-weight: 640;
+  letter-spacing: -0.012em;
+}
+
+.card p {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+
+.card-icon,
+.step-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  margin-bottom: 0.9rem;
+}
+
+.card-icon svg,
+.step-icon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/* =========================================================================
+   11. Steps
+   ========================================================================= */
+
+.steps {
+  display: grid;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+  grid-template-columns: minmax(0, 1fr);
+  list-style: none;
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.step {
+  position: relative;
+  padding: clamp(1.2rem, 2.6vw, 1.6rem);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.step-number {
+  position: absolute;
+  top: clamp(1.2rem, 2.6vw, 1.6rem);
+  right: clamp(1.2rem, 2.6vw, 1.6rem);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.step-title {
+  font-size: var(--fs-h3);
+  line-height: 1.32;
+  font-weight: 640;
+  letter-spacing: -0.012em;
+}
+
+.step p {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+
+/* =========================================================================
+   12. Install
+   ========================================================================= */
+
+.install-grid {
+  display: grid;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.install-option {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.install-option-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.install-option-head h3 {
+  font-size: var(--fs-h3);
+  line-height: 1.3;
+  font-weight: 640;
+  letter-spacing: -0.012em;
+}
+
+.install-option-lede {
+  margin-top: 0.6rem;
+  color: var(--muted);
+}
+
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-now {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.badge-soon {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.install-steps {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  counter-reset: install-step;
+  margin-top: var(--sp-5);
+}
+
+.install-steps li {
+  position: relative;
+  padding-left: 2.4rem;
+  counter-increment: install-step;
+}
+
+.install-steps li::before {
+  content: counter(install-step);
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: var(--fs-xs);
+  font-weight: 650;
+}
+
+.install-step-title {
+  display: block;
+  font-weight: 600;
+}
+
+.install-steps p {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.store-button-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: var(--sp-5);
+}
+
+.store-note {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.note-box {
+  margin-top: var(--sp-5);
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+.note-box-wide {
+  margin-top: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.requirements-title {
+  font-weight: 650;
+  color: var(--text);
+}
+
+.requirements-list {
+  margin-top: 0.4rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* =========================================================================
+   13. Check list (privacy)
+   ========================================================================= */
+
+.check-list {
+  display: grid;
+  gap: 1.15rem;
+  list-style: none;
+  margin-top: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.check-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.check-icon {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.15rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  flex: none;
+}
+
+.check-icon svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.check-list p {
+  color: var(--muted);
+}
+
+.check-list strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+/* =========================================================================
+   14. FAQ
+   ========================================================================= */
+
+.faq-list {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.faq-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.25rem;
+  padding: 0.95rem 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-chevron {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted);
+  transition: transform 0.2s var(--ease);
+}
+
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-item[open] summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-body {
+  padding: 0.85rem 1.1rem 1.1rem;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  max-width: 78ch;
+}
+
+.faq-body p + p {
+  margin-top: 0.6rem;
+}
+
+/* =========================================================================
+   15. Footer
+   ========================================================================= */
+
+.site-footer {
+  padding-block: clamp(2.5rem, 6vw, 4rem) 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  /* Safe use of content-visibility: no scroll animations or interactive
+     measurement inside the footer, so skipping its render work cannot cause
+     a layout shift or a missed reveal. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 26rem;
+}
+
+.footer-inner {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.footer-brand .brand-name {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.footer-tagline {
+  flex-basis: 100%;
+  margin-top: 0.35rem;
+  max-width: 38ch;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.footer-heading {
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.footer-col p {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.footer-links {
+  display: grid;
+  gap: 0.45rem;
+  list-style: none;
+  font-size: var(--fs-sm);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+/* =========================================================================
+   16. Scroll reveal
+   The hidden state is scoped to .js, which is set by an inline script in the
+   head. With JavaScript disabled the class stays .no-js and every section
+   renders visible and readable.
+   ========================================================================= */
+
+.js .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* =========================================================================
+   17. Responsive adjustments
+   ========================================================================= */
+
+@media (max-width: 55.999rem) {
+  /* The menu button is only useful when JavaScript can drive it, so it is
+     hidden by the .no-js rules a few lines below. */
+  .js .site-nav {
+    display: none;
+  }
+
+  .js .site-header[data-nav-open="true"] .site-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-basis: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    padding: 0.75rem clamp(1rem, 4vw, 2rem) 1.25rem;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .js .site-nav-list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+  }
+
+  .js .site-nav-list a {
+    padding-block: 0.7rem;
+    font-size: 1rem;
+  }
+
+  .js .site-nav .btn {
+    align-self: flex-start;
+    margin-top: 0.6rem;
+  }
+
+  /* No-JavaScript fallback: the links wrap onto their own row so the header
+     never needs a horizontal scrollbar. */
+  .no-js .nav-toggle {
+    display: none;
+  }
+
+  .no-js .site-nav {
+    flex-basis: 100%;
+    padding-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 40rem) {
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 56rem) {
+  .nav-toggle {
+    display: none;
+  }
+
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .footer-inner {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+
+  .install-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 64rem) {
+  .card-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .card-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 65rem) {
+  /* Side by side mock screens, with the results page taking slightly more
+     room. Below this width they stack so nothing has to shrink. */
+  .mock-stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 34rem);
+    align-items: start;
+  }
+
+  .mock-split {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  }
+}
+
+/* Touch devices: every interactive target gets at least 44px of height. */
+@media (pointer: coarse) {
+  .btn,
+  .site-nav-list a,
+  .footer-links a,
+  .faq-item summary,
+  .skip-link {
+    min-height: 44px;
+  }
+
+  .site-nav-list a,
+  .footer-links a {
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* =========================================================================
+   18. Reduced motion and forced colors
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .js .reveal,
+  .js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .scan-sweep {
+    animation: none;
+  }
+
+  .scan-ring {
+    animation: none;
+    opacity: 0;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .card,
+  .step,
+  .install-option,
+  .mock-window,
+  .faq-item,
+  .note-box {
+    border-color: CanvasText;
+  }
+
+  .btn {
+    border-color: ButtonText;
+  }
+}
